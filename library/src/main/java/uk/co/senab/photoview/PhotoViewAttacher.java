@@ -142,6 +142,7 @@ public class PhotoViewAttacher implements IPhotoView, View.OnTouchListener,
     private OnMatrixChangedListener mMatrixChangeListener;
     private OnPhotoTapListener mPhotoTapListener;
     private OnViewTapListener mViewTapListener;
+    private OnPhotoLongClickListener mPhotoLongClickListener;
     private OnLongClickListener mLongClickListener;
     private OnScaleChangeListener mScaleChangeListener;
     private OnSingleFlingListener mSingleFlingListener;
@@ -184,7 +185,30 @@ public class PhotoViewAttacher implements IPhotoView, View.OnTouchListener,
                     // forward long click listener
                     @Override
                     public void onLongPress(MotionEvent e) {
-                        if (null != mLongClickListener) {
+                        boolean eventHandled = false;
+                        ImageView imageView = getImageView();
+
+                        if (null != getOnPhotoLongClickListener()) {
+                            final RectF displayRect = getDisplayRect();
+
+                            if (null != displayRect) {
+                                final float x = e.getX(), y = e.getY();
+
+                                // Check to see if the user long click on the photo
+                                if (displayRect.contains(x, y)) {
+
+                                    float xResult = (x - displayRect.left)
+                                            / displayRect.width();
+                                    float yResult = (y - displayRect.top)
+                                            / displayRect.height();
+
+                                    getOnPhotoLongClickListener().onPhotoLongClick(imageView, xResult, yResult);
+                                    eventHandled = true;
+                                }
+                            }
+                        }
+
+                        if (null != mLongClickListener && !eventHandled) {
                             mLongClickListener.onLongClick(getImageView());
                         }
                     }
@@ -584,9 +608,20 @@ public class PhotoViewAttacher implements IPhotoView, View.OnTouchListener,
         mPhotoTapListener = listener;
     }
 
+    @Override
+    public void setOnPhotoLongClickListener(OnPhotoLongClickListener listener) {
+        mPhotoLongClickListener = listener;
+    }
+
     @Nullable
     OnPhotoTapListener getOnPhotoTapListener() {
         return mPhotoTapListener;
+    }
+
+    @Nullable
+    OnPhotoLongClickListener getOnPhotoLongClickListener()
+    {
+        return mPhotoLongClickListener;
     }
 
     @Override
@@ -1017,6 +1052,26 @@ public class PhotoViewAttacher implements IPhotoView, View.OnTouchListener,
          * A simple callback where out of photo happened;
          * */
         void onOutsidePhotoTap();
+    }
+
+    /**
+     * Interface definition for a callback to be invoked when the Photo is long-pressed.
+     *
+     * @author Chris Banes
+     */
+    public interface OnPhotoLongClickListener {
+
+        /**
+         * A callback to receive where the user long-press the photo. You will only receive a callback if
+         * the user taps on the actual photo, tapping on 'whitespace' will be ignored.
+         *
+         * @param view - View the user tapped.
+         * @param x    - where the user tapped from the of the Drawable, as percentage of the
+         *             Drawable width.
+         * @param y    - where the user tapped from the top of the Drawable, as percentage of the
+         *             Drawable height.
+         */
+        void onPhotoLongClick(View view, float x, float y);
     }
 
     /**
