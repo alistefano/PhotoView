@@ -32,6 +32,7 @@ import uk.co.senab.photoview.PhotoViewAttacher.OnViewTapListener;
 public class PhotoView extends ImageView implements IPhotoView {
 
     protected PhotoViewAttacher mAttacher;
+    protected PhotoViewAttacher mExternalAttacher;
 
     private ScaleType mPendingScaleType;
     private PhotoViewAttacher.OnPhotoChangeListener mPhotoChangeListener;
@@ -146,12 +147,43 @@ public class PhotoView extends ImageView implements IPhotoView {
         mAttacher.setScaleLevels(minimumScale, mediumScale, maximumScale);
     }
 
+    public void setExternalAttacher(PhotoViewAttacher attacher)
+    {
+        this.mExternalAttacher = attacher;
+    }
+
     @Override
     // setImageBitmap calls through to this method
     public void setImageDrawable(Drawable drawable) {
-        super.setImageDrawable(drawable);
-        if (null != mAttacher) {
-            mAttacher.update();
+        if(mAttacher == null)
+            super.setImageDrawable(drawable);
+        else {
+            if(mExternalAttacher == null)
+            {
+                super.setImageDrawable(drawable);
+                mAttacher.update();
+            }
+            else
+            {
+                float scaleValue = mExternalAttacher.getScale();
+                RectF rectPrev = mExternalAttacher.getDisplayRect();
+
+                super.setImageDrawable(drawable);
+                mAttacher.update();
+                mExternalAttacher.update();
+                
+                if(scaleValue >1)
+                {
+                    float xPrev = (float) (getWidth()/2.0 - rectPrev.left);
+                    float yPrev = (float) (getHeight()/2.0 - rectPrev.top);
+                    mExternalAttacher.setScale(scaleValue,false);
+                    RectF rectAfter = mExternalAttacher.getDisplayRect();
+                    float xAfter = (float) (getWidth()/2.0 - rectAfter.left);
+                    float yAfter = (float) (getHeight()/2.0 - rectAfter.top);
+                    mExternalAttacher.onDrag(xAfter - xPrev,yAfter - yPrev);
+                }
+            }
+
         }
         if (null != mPhotoChangeListener)
             mPhotoChangeListener.onPhotoChange();
