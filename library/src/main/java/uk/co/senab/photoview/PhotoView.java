@@ -167,14 +167,20 @@ public class PhotoView extends ImageView implements IPhotoView {
             {
                 float scaleValue = mExternalAttacher.getScale();
                 RectF rectPrev = mExternalAttacher.getDisplayRect();
-                float xPrev = (float) (getWidth()/2.0 - rectPrev.left);
-                float yPrev = (float) (getHeight()/2.0 - rectPrev.top);
+                float xPrev = 0;
+                float yPrev = 0;
+                if(rectPrev != null)
+                {
+                    xPrev = (float) (getWidth()/2.0 - rectPrev.left);
+                    yPrev =(float) (getHeight()/2.0 - rectPrev.top);
+                }
+
 
                 super.setImageDrawable(drawable);
                 mAttacher.update();
                 mExternalAttacher.update();
 
-                if(scaleValue >1)
+                if(scaleValue >1 && rectPrev != null)
                 {
                     mExternalAttacher.setScale(scaleValue,false);
                     RectF rectAfter = mExternalAttacher.getDisplayRect();
