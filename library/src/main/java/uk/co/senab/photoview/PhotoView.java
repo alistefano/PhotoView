@@ -31,9 +31,10 @@ import uk.co.senab.photoview.PhotoViewAttacher.OnViewTapListener;
 
 public class PhotoView extends ImageView implements IPhotoView {
 
-    private PhotoViewAttacher mAttacher;
+    protected PhotoViewAttacher mAttacher;
 
     private ScaleType mPendingScaleType;
+    private PhotoViewAttacher.OnPhotoChangeListener mPhotoChangeListener;
 
     public PhotoView(Context context) {
         this(context, null);
@@ -148,26 +149,12 @@ public class PhotoView extends ImageView implements IPhotoView {
     @Override
     // setImageBitmap calls through to this method
     public void setImageDrawable(Drawable drawable) {
-        if(null == mAttacher) {
-            super.setImageDrawable(drawable);
-        }
-        else {
-            float scaleValue = mAttacher.getScale();
-            RectF rectPrev = mAttacher.getDisplayRect();
-
-            super.setImageDrawable(drawable);
+        super.setImageDrawable(drawable);
+        if (null != mAttacher) {
             mAttacher.update();
-            if(scaleValue >1)
-            {
-                float xPrev = (float) (getWidth()/2.0 - rectPrev.left);
-                float yPrev = (float) (getHeight()/2.0 - rectPrev.top);
-                mAttacher.setScale(scaleValue,false);
-                RectF rectAfter = mAttacher.getDisplayRect();
-                float xAfter = (float) (getWidth()/2.0 - rectAfter.left);
-                float yAfter = (float) (getHeight()/2.0 - rectAfter.top);
-                mAttacher.onDrag(xAfter - xPrev,yAfter - yPrev);
-            }
         }
+        if (null != mPhotoChangeListener)
+            mPhotoChangeListener.onPhotoChange();
     }
 
     @Override
@@ -176,6 +163,8 @@ public class PhotoView extends ImageView implements IPhotoView {
         if (null != mAttacher) {
             mAttacher.update();
         }
+        if (null != mPhotoChangeListener)
+            mPhotoChangeListener.onPhotoChange();
     }
 
     @Override
@@ -184,6 +173,8 @@ public class PhotoView extends ImageView implements IPhotoView {
         if (null != mAttacher) {
             mAttacher.update();
         }
+        if (null != mPhotoChangeListener)
+            mPhotoChangeListener.onPhotoChange();
     }
 
     @Override
@@ -203,6 +194,13 @@ public class PhotoView extends ImageView implements IPhotoView {
     @Override
     public void setOnLongClickListener(OnLongClickListener l) {
         mAttacher.setOnLongClickListener(l);
+    }
+
+    @Override
+    public void setOnPhotoChangeListener(PhotoViewAttacher.OnPhotoChangeListener l)
+    {
+        mPhotoChangeListener = l;
+        mAttacher.setOnPhotoChangeListener(l);
     }
 
     @Override

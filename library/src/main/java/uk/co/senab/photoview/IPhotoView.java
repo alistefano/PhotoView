@@ -158,7 +158,7 @@ public interface IPhotoView {
      * @param listener - Listener to be registered.
      */
     void setOnPhotoLongClickListener(PhotoViewAttacher.OnPhotoLongClickListener listener);
-
+    void setOnPhotoChangeListener(PhotoViewAttacher.OnPhotoChangeListener listener);
     /**
      * Register a callback to be invoked when the Photo displayed by this View is long
      *

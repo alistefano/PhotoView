@@ -146,6 +146,7 @@ public class PhotoViewAttacher implements IPhotoView, View.OnTouchListener,
     private OnLongClickListener mLongClickListener;
     private OnScaleChangeListener mScaleChangeListener;
     private OnSingleFlingListener mSingleFlingListener;
+    private OnPhotoChangeListener mPhotoChangeListener;
 
     private int mIvTop, mIvRight, mIvBottom, mIvLeft;
     private FlingRunnable mCurrentFlingRunnable;
@@ -613,6 +614,11 @@ public class PhotoViewAttacher implements IPhotoView, View.OnTouchListener,
         mPhotoLongClickListener = listener;
     }
 
+    @Override
+    public void setOnPhotoChangeListener(OnPhotoChangeListener listener) {
+        mPhotoChangeListener = listener;
+    }
+
     @Nullable
     OnPhotoTapListener getOnPhotoTapListener() {
         return mPhotoTapListener;
@@ -1072,6 +1078,10 @@ public class PhotoViewAttacher implements IPhotoView, View.OnTouchListener,
          *             Drawable height.
          */
         void onPhotoLongClick(View view, float x, float y);
+    }
+
+    public interface OnPhotoChangeListener {
+        void onPhotoChange();
     }
 
     /**
