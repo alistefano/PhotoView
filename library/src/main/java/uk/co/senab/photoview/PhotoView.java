@@ -148,9 +148,25 @@ public class PhotoView extends ImageView implements IPhotoView {
     @Override
     // setImageBitmap calls through to this method
     public void setImageDrawable(Drawable drawable) {
-        super.setImageDrawable(drawable);
-        if (null != mAttacher) {
+        if(null == mAttacher) {
+            super.setImageDrawable(drawable);
+        }
+        else {
+            float scaleValue = mAttacher.getScale();
+            RectF rectPrev = mAttacher.getDisplayRect();
+
+            super.setImageDrawable(drawable);
             mAttacher.update();
+            if(scaleValue >1)
+            {
+                float xPrev = (float) (getWidth()/2.0 - rectPrev.left);
+                float yPrev = (float) (getHeight()/2.0 - rectPrev.top);
+                mAttacher.setScale(scaleValue,false);
+                RectF rectAfter = mAttacher.getDisplayRect();
+                float xAfter = (float) (getWidth()/2.0 - rectAfter.left);
+                float yAfter = (float) (getHeight()/2.0 - rectAfter.top);
+                mAttacher.onDrag(xAfter - xPrev,yAfter - yPrev);
+            }
         }
     }
 
